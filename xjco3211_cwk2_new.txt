@@ -1,0 +1,103 @@
+1. Assignment guidance This exercise aims to give you some practical
+experience of using serverless architectures. It will also give you the
+opportunity to research on the cloud computing domain of Function as
+a Service (FaaS), technologies and performance.
+Serverless computing is revolutionising cloud application development
+as it oﬀers the ability to create modular, highly-scalable, fault-tolerant
+applications, with minimal operational management. In order to con-
+tribute to its widespread adoption of serverless platforms, the perfor-
+mance of functions, including workﬂows, running on such platforms is
+key. This coursework therefore aims to investigate the performance of
+workﬂow functions.
+You should carefully review the lecture notes on serverless architectures
+before you start work.
+2. Assessment tasks
+(a) For the investigation, use Microsoft Azure Functions serverless
+platform.
+(b) Research into serverless workﬂows deployed on serverless plat-
+forms to provide insight into their capabilities and increase aware-
+ness of their potential;
+(c) Formulate and design a serverless workﬂow of your choice. The
+workﬂow should consist of two functions. You are free to imple-
+ment more than two functions if your solution requires it.
+(d) Specify a cloud-based technical implementation for analysis of
+your serverless workﬂow, using one language runtime of your choice.
+You can choose, for example, among Python, Java and Node.js.;
+(e) Demonstrate the performance of the workﬂow in terms of runtime
+and resource consumption, e.g. CPU and memory utilisation.
+Requirements
+(a) Choose an application of a serverless workﬂow, e.g. image pro-
+cessing pipeline, machine learning, Internet of Things (IoT) etc.
+(b) An important aspect of the implementation of the serverless func-
+tions is how they are triggered , see lecture slides and examples on
+3
+the Azure portal. One useful mechanism is the Azure SQL trigger
+for Functions, see documentation. You may use the Azure SQL
+database as part of the implementation;
+(c) For the evaluation, investigate the aspect of scalability by increas-
+ing the number of function invocations;
+(d) You need to demonstrate your ability to write code to implement
+your own serverless functions.
+(e) Report your performance results.
+Example: An Internet of Things (IoT) framework collects environ-
+mental data, e.g. temperature, CO2 level etc from N sensors, which
+are simulated using code running in a ﬁrst Azure Function to achieve
+high scalability whilst simplifying deployment. This code mimics the
+data that would be collected at regular intervals from sensors before it
+is stored in a database. Once the new collected data is stored in the
+database by the ﬁrst function (simulated data), this will automatically
+trigger the second function thanks to a dabase change tracking mech-
+anism. The role of the second function is to display various statistcis,
+e.g. output the minimum, maximum and average of the data. The
+aspect of performance relates to the number of sensors N as well as the
+volume of data generated and processed over time.
+3. General guidance and study support Learning resources and use-
+ful links are available in COMP3211 area on Minerva. Help is also
+available on the module Teams channel.
+4. Assessment criteria and marking process
+The coursework will be marked out of 50. Coursework feedback and
+return of marks will be available on Gradescope.
+5. Presentation and referencing
+The quality of written English will be assessed in this work. As a
+minimum, you must ensure:
+ Paragraphs are used
+ There are links between and within paragraphs although these
+may be ineﬀective at times
+4
+ There are (at least) attempts at referencing
+ Word choice and grammar do not seriously undermine the mean-
+ing and comprehensibility of the argument
+ Word choice and grammar are generally appropriate to an aca-
+demic text
+6. Submission requirements
+ Questions: address the questions in relation to the implemen-
+tation, discussion of results, and evidence of execution on Grade-
+scope.
+ Code: submit your code for the exercise. You can either: 1)
+provide a link to Git, or 2) create a Zip or tar archive of the ﬁles
+which make up your system and upload it on Gradescope. If you
+have organised your ﬁles into a directory hierarchy, then please
+package this as a single Zip or tar archive.
+ Demonstration: produce a short video (maximum 2 minutes
+long) to demonstrate your results. You can either: 1) upload it
+on Gradescope, or 2) upload on any cloud platform of your choice,
+e.g. Youtube and provide the link.
+7. Academic misconduct and plagiarism
+Academic integrity means engaging in good academic practice. This
+involves essential academic skills, such as keeping track of where you
+ﬁnd ideas and information and referencing these accurately in your
+work. By submitting this assignment you are conﬁrming that the work
+is a true expression of your own work and ideas and that you have given
+credit to others where their work has contributed to yours.
+5
+8. Assessment/marking criteria
+Workﬂow originality 5
+Solution Design 10
+Implementation 15
+Evaluation 10
+Code/scripts 5
+Video 5
+50
+A lateness submision penalty will apply (5% of the maximum available
+mark per day).
+6

@@ -1,0 +1,76 @@
+# Air Quality Workflow (Azure Functions)
+
+## 1. 项目概述
+
+该项目实现了一个基于 Azure Functions 的空气质量监控工作流，涵盖数据生成、Change Tracking 触发以及统计汇总。工作流包括两个 Python 函数：
+
+- `GenerateAirQualityData`（Timer Trigger）：每分钟模拟多个监测站点，批量写入 PM2.5、PM10、O₃、AQI 等字段到 `air_quality_data` 表；
+- `ProcessAirQualitySummary`（Timer Trigger）：轮询 Azure SQL Change Tracking，提取新增记录、计算平均 AQI、最大 PM2.5、最小 O₃，并将统计结果写入 `air_quality_summary` 表。
+
+## 2. Azure SQL 结构与 Change Tracking
+
+使用 SQL 管理工具运行以下脚本以创建所需对象并启用 Change Tracking：
+
+```sql
+USE [<数据库名>];
+
+ALTER DATABASE CURRENT SET CHANGE_TRACKING = ON (CHANGE_RETENTION = 2 DAYS, AUTO_CLEANUP = ON);
+
+CREATE TABLE air_quality_data (
+  id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+  station_id NVARCHAR(50),
+  recorded_at DATETIME2,
+  pm25 FLOAT,
+  pm10 FLOAT,
+  o3 FLOAT,
+  aqi INT
+);
+
+CREATE TABLE air_quality_summary (
+  id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+  window_start DATETIME2,
+  window_end DATETIME2,
+  avg_aqi FLOAT,
+  max_pm25 FLOAT,
+  min_o3 FLOAT,
+  record_count INT
+);
+
+CREATE TABLE air_quality_sync_state (
+  id INT PRIMARY KEY CHECK (id = 1),
+  last_version BIGINT
+);
+
+INSERT INTO air_quality_sync_state (id, last_version) VALUES (1, 0);
+
+ALTER TABLE air_quality_data ENABLE CHANGE_TRACKING WITH (TRACK_COLUMNS_UPDATED = OFF);
+```
+
+## 3. 本地开发与依赖
+
+1. 安装 Python 3.10/3.11；
+2. 运行 `pip install -r requirements.txt`（新增 `azure-identity` 以启用 Azure AD 令牌登录）；
+3. 更新 `local.settings.json` 中的 `SQL_CONNECTION_STRING`，填入 Azure SQL Server 信息；若未配置 `Uid`/`Pwd`，运行脚本时会提示使用 Device Code 登录 Azure AD（参考 `zhiling.md`）。
+
+## 4. 函数职责与触发
+
+- `GenerateAirQualityData`：`function.json` 里使用 `timerTrigger` 每分钟调度一次（CRON `0 */1 * * * *`），通过 `pyodbc` 批量插入数据。`BATCH_SIZE` 与 `STATION_COUNT` 可通过环境变量调整生成规模。
+- `ProcessAirQualitySummary`：`timerTrigger` 每两分钟轮询 Change Tracking 读取 `air_quality_data` 的新增/更新项，计算统计后写入 `air_quality_summary`。`air_quality_sync_state` 表记录上一次读取的 `CHANGE_TRACKING_CURRENT_VERSION()`，避免重复处理。
+
+## 5. 性能评估指南
+
+1. **负载方案**：通过修改 `BATCH_SIZE`、`STATION_COUNT`、函数触发频率（Timer Schedule）模拟不同负载。可以先用 `python load_test.py --batch 50 --stations 8 --iterations 5` 在本地往 SQL 直接写数据，观察 `ProcessAirQualitySummary` 的响应时间。
+2. **采集指标**：在 Azure Portal 的 Function App → Monitoring 里查看每个 Function 的 `Invocation Count`、`Average Duration`、`Memory Working Set`、`CPU Time`；用 Log Analytics 查询 `requests` 表或 `customMetrics`。
+3. **可扩展性分析**：记录三组负载（例如 20/50/100 条）对应的平均执行时间，比较耗时是否线性增长，是否触发自动缩放或出现冷启动。把这些记录整理成表格/截图附在报告或视频中。
+
+## 6. 运行与部署建议
+
+1. 本地测试：在项目根目录运行 `func start` 启动 Functions，确保 `SQL_CONNECTION_STRING` 可用；也可以只执行 `GenerateAirQualityData` 或 `ProcessAirQualitySummary` 的 `__init__.py` 以快速调试。
+2. 部署：将项目部署到 Azure Function App（Python runtime 4.x），在应用设置里配置相同的 `SQL_CONNECTION_STRING`，然后启用 System Managed Identity 访问 Azure SQL 时需开启“Allow Azure services”或配置 VNet。
+3. 安全：部署后关闭不必要的 Public Access，仅在 Firewall 中允许 Function App 的出站 IP。
+
+## 7. 视频与成果汇报
+
+1. 录制不超过 2 分钟的演示：展示 Azure Portal 中两个函数的 Invocation Logs、SQL 表样本数据，以及性能指标（Duration、Memory）。
+2. 讲述测试方法（比如批量插入、Change Tracking 阶段、性能指标捕获），突出“负载量对函数 runtime/资源消耗”的结果。
+3. 报告中引用 Azure 文档或 lecture notes 作为出处即可满足 referencing 要求。
