@@ -7,11 +7,16 @@ import threading
 from datetime import datetime, timedelta
 from typing import Any, Dict
 
+# 设置 ODBC 驱动路径（macOS 需要）
+if not os.environ.get("ODBCSYSINI"):
+    os.environ["ODBCSYSINI"] = "/opt/homebrew/etc"
+
 import pyodbc
 from azure.identity import (
     DeviceCodeCredential,
     ManagedIdentityCredential,
     TokenCachePersistenceOptions,
+    UsernamePasswordCredential,
 )
 
 _ODBC_TOKEN_KEY = 1256
@@ -33,7 +38,17 @@ def _build_credential():
         if _credential is not None:
             return _credential
 
-        if os.environ.get("MSI_ENDPOINT") or os.environ.get("IDENTITY_ENDPOINT"):
+        # Check if username and password are provided for Azure AD authentication
+        azure_username = os.environ.get("AZURE_SQL_USERNAME")
+        azure_password = os.environ.get("AZURE_SQL_PASSWORD")
+
+        if azure_username and azure_password:
+            _credential = UsernamePasswordCredential(
+                client_id="04b07795-8ddb-461a-bbee-02f9e1bf7b46",
+                username=azure_username,
+                password=azure_password,
+            )
+        elif os.environ.get("MSI_ENDPOINT") or os.environ.get("IDENTITY_ENDPOINT"):
             _credential = ManagedIdentityCredential()
         else:
             cache_opts = TokenCachePersistenceOptions(allow_unencrypted_storage=True)

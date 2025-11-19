@@ -4,6 +4,9 @@ import os
 import pyodbc
 from azure.identity import DeviceCodeCredential
 
+# 设置 ODBC 驱动路径（macOS 需要）
+os.environ["ODBCSYSINI"] = "/opt/homebrew/etc"
+
 
 def main():
     cfg = json.load(open("local.settings.json", encoding="utf-8"))

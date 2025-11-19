@@ -3,6 +3,6 @@
   "Values": {
     "AzureWebJobsStorage": "UseDevelopmentStorage=true",
     "FUNCTIONS_WORKER_RUNTIME": "python",
-    "SQL_CONNECTION_STRING": "Driver={ODBC Driver 18 for SQL Server};Server=sc22wncw2.database.windows.net;Database=airquality_CW2;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+    "SQL_CONNECTION_STRING": "Driver={ODBC Driver 18 for SQL Server};Server=airqualitycw2.database.windows.net;Database=airqualitycw2;Uid=sc22wn;Pwd=020117Xyz;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
   }
 }
