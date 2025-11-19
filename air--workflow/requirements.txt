@@ -1,4 +1,4 @@
 azure-functions
 python-dotenv
-pyodbc
-azure-identity
+pymssql
+
